@@ -10,6 +10,7 @@ export default function Indicator(config:Config){
     return (
         <Paper
             sx={{
+              m:2,
               p: 2,
               display: 'flex',
               flexDirection: 'column'
