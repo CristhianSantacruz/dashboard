@@ -33,13 +33,13 @@ function App() {
         
           <WeatherTodayCard/>
           </Grid>
-          <Grid sx={{
+          <Grid item sx={{
               marginLeft: '70px',
               marginTop:'20px'
           }} xs={12} lg={4}>
             <ControlPanel />
           </Grid>
-          <Grid sx={{marginLeft:'90px', marginTop:'20px'}} xs={12} lg={10}>
+          <Grid item sx={{marginLeft:'90px', marginTop:'20px'}} xs={12} lg={10}>
              <WeatherChart></WeatherChart>
           </Grid>
         
