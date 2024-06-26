@@ -1,5 +1,6 @@
 import { Paper , Typography,Box,InputLabel,MenuItem,FormControl,Select,SelectChangeEvent } from "@mui/material";
-import {useState,useRef} from 'react'
+import {useState,useRef} from 'react';
+import { fetchAndParseXML } from "../data/openwatherdata";
 export default function ControlPanel(){
 
     let [selected , setSelected] = useState(-1)
@@ -19,6 +20,7 @@ export default function ControlPanel(){
         if (descriptionRef.current !== null) {
 			descriptionRef.current.innerHTML = (idx >= 0) ? items[idx]["description"] : ""
 		}
+        console.log(fetchAndParseXML())
     }
     const descriptionRef = useRef<HTMLDivElement>(null);
     return (
@@ -54,11 +56,11 @@ export default function ControlPanel(){
                 
             </FormControl>
             {/* Muestra la descripción de la variable seleccionada */}
-            <Typography mt={2} component="p" color="text.secondary">
+            {/*<Typography mt={2} component="p" color="text.secondary">
 			    {
 				    (selected >= 0)?items[selected]["description"]:""
 			    }
-			</Typography>
+			</Typography>*/}
 			<Typography ref={descriptionRef} mt={2} component="p" color="text.secondary" />
 
         </Box>

@@ -8,6 +8,7 @@ export default function WeatherChart(){
         title : "Precipitacion,Humedad y Nubosidad vs Hora",
         curveType : "funtion",
         legend : {position: "right"}
+        
     }
 
     const data = [
@@ -29,11 +30,12 @@ export default function WeatherChart(){
 			}}
 		>
 			<Chart
-				chartType="LineChart"
+				chartType="ColumnChart"
 				data={data}
 				width="100%"
 				height="400px"
 				options={options}
+                legendToggle
 		/>
 		</Paper>
     )
