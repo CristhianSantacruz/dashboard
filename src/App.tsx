@@ -19,16 +19,43 @@ function App() {
 
   useEffect(() => {
     async function fetchData() {
-      let API_KEY = "a125c79b98b9cabf669964cf63329487";
-      let response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Guayaquil&mode=xml&appid=${API_KEY}`);
-      let savedTextXML = await response.text();
 
+      let savedTextXML = localStorage.getItem("openWeatherMap")
+      let expiringTime = localStorage.getItem("expiringTime")
+
+      {/* Estampa de tiempo actual */}
+
+      let nowTime = (new Date()).getTime();
+      if(expiringTime === null || nowTime > parseInt(expiringTime)) {
+
+        {/* Request */}
+
+        let API_KEY = "a125c79b98b9cabf669964cf63329487"
+        let response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Guayaquil&mode=xml&appid=${API_KEY}`)
+        savedTextXML = await response.text();
+
+
+        {/* Diferencia de tiempo */}
+
+        let hours = 1
+        let delay = hours * 3600000
+
+
+        {/* En el LocalStorage, almacena texto en la clave openWeatherMap y la estampa de tiempo de expiración */}
+
+        localStorage.setItem("openWeatherMap", savedTextXML)
+        localStorage.setItem("expiringTime", (nowTime + delay ).toString() )
+    }
+    if(savedTextXML != null){
       const parser = new DOMParser();
       const xml = parser.parseFromString(savedTextXML, "application/xml");
 
       let dataToIndicators = new Array();
 
       let location = xml.getElementsByTagName("location")[1];
+
+      let city = xml.getElementsByTagName("name")[0].innerHTML
+      dataToIndicators.push(["Location","name",city])
 
       let geobaseid = location.getAttribute("geobaseid");
       dataToIndicators.push(["Location", "geobaseid", geobaseid]);
@@ -56,7 +83,7 @@ function App() {
       arrayObjects = arrayObjects.slice(0, 8);
 
       setRowsTable(arrayObjects);
-    }
+    }}
     
     fetchData();
   }, []);
@@ -103,6 +130,9 @@ function App() {
         </Grid>
         <Grid item xs={6} lg={2}>
           {indicators[2]}
+        </Grid>
+        <Grid item xs={6} lg={2}>
+          {indicators[3]}
         </Grid>
         <Grid item xs={12} lg={8}>
           <BasicTable rows={rowsTable} />
