@@ -3,10 +3,12 @@ import { Grid, Typography } from '@mui/material';
 import WeatherApp from './components/WeatherApp';
 import WeatherTodayCard from './components/WeatherTodayCard';
 import ControlPanel from './components/ControlPanel';
-import WeatherChart from './components/WeatherChart';
+import HumidityChart from './components/charts/HumidityChart';
+import TemperatureChart from './components/charts/TemperatureChart';
 import { useEffect, useState } from 'react';
 import Indicator from './components/Indicator';
 import BasicTable from './components/BasicTable';
+import AverageIndicators from './components/AverageIndicator';
 
 interface Row {
   rangeHours: string;
@@ -18,6 +20,15 @@ function App() {
   let [rowsTable, setRowsTable] = useState<Array<Row>>([]);
   let [city,setCity] = useState("Ecuador")
   let [country,setCountry] =  useState("")
+  let [averageTemperature,setAverageTemperature] = useState(0)
+  
+
+  const averageData = {
+    precipitation: 0.02,
+    humidity: 61,
+    temperature: 302.67 - 273.15, // Convertir de Kelvin a Celsius
+    visibility: 10000
+ } 
   // Estado para almacenar la URL de la imagen de fondo actual
 
 
@@ -76,11 +87,29 @@ function App() {
       
       
       let arrayObjects = Array.from(xml.getElementsByTagName("time")).map((timeElement:any) => {
-      let rangeHours = timeElement.getAttribute("from").split("T")[1] + " - " + timeElement.getAttribute("to").split("T")[1];
-      let windDirection = timeElement.getElementsByTagName("windDirection")[0].getAttribute("deg") + " " + timeElement.getElementsByTagName("windDirection")[0].getAttribute("code");
-      return { rangeHours, windDirection };
+            let rangeHours = timeElement.getAttribute("from").split("T")[1] + " - " + timeElement.getAttribute("to").split("T")[1];
+            let windDirection = timeElement.getElementsByTagName("windDirection")[0].getAttribute("deg") + " " + timeElement.getElementsByTagName("windDirection")[0].getAttribute("code");
+            return { rangeHours, windDirection };
       });
 
+      let arrayTempuratureData = Array.from(xml.getElementsByTagName("time")).map((timeElement:any) => {
+        let temperature = timeElement.getElementsByTagName("temperature")[0].getAttribute("value")
+        return {temperature}
+      })
+      
+
+      //saco un promedio de las temperaturas para de todos los dias
+      const temperatures = arrayTempuratureData.map(data => parseFloat(data.temperature));
+      const sumKelvin = temperatures.reduce((total, temperature) => total + temperature, 0);
+      const averageTemperatureKelvin = sumKelvin / temperatures.length;
+      const averageTemperatureCelsius = Number((averageTemperatureKelvin - 273.15).toFixed(2));
+      setAverageTemperature(averageTemperatureCelsius)
+      console.log(`Promedio de temperatura en Celsius: ${averageTemperatureCelsius} °C`);
+
+      
+
+      console.log("ARRAY DENTRO DEL OBJECT",arrayObjects)  
+      console.log("TODAS LAS TEMPERATURAS ",arrayTempuratureData)
       arrayObjects = arrayObjects.slice(0, 8);
 
       setRowsTable(arrayObjects);
@@ -99,9 +128,24 @@ function App() {
           
             <WeatherApp />
 
+            <AverageIndicators humidity={averageData.humidity} precipitation={averageData.precipitation} temperature={averageTemperature} visibility={averageData.visibility} /> 
+       
+
             <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
               <Grid item xs={12} lg={4}>
                 <ControlPanel />
+              </Grid>
+            </Grid>
+
+            <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
+              <Grid item xs={12}>
+                <TemperatureChart />
+              </Grid>
+            </Grid>
+
+            <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
+              <Grid item xs={12}>
+                <HumidityChart />
               </Grid>
             </Grid>
 
@@ -111,11 +155,6 @@ function App() {
               </Grid>
             </Grid>
 
-            <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
-              <Grid item xs={12}>
-                <WeatherChart />
-              </Grid>
-            </Grid>
         </Grid>
 
 
