@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { parseStringPromise } from  'xml2js';
-import xml2js from 'xml2js'
 import { xml2json } from 'xml-js';
 const url = 'https://api.openweathermap.org/data/2.5/forecast?q=Guayaquil&mode=xml&appid=a125c79b98b9cabf669964cf63329487';
 
