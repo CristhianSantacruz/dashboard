@@ -1,27 +1,63 @@
-export interface WeatherData {
-    city : string,
+interface WeatherCardProps {
+    date:string,
+    city: string,
+    precipitation : number
+    windSpeed :number,
     temperature : number,
-    condition : string,
-    windSpeed : number,
     humidity : number,
-    icon : string,
+    cloud : string,
+    value : number,
 }
 
-export const weatherData : WeatherData[] = [
-    {
-        city : "Guayaquil",
-        temperature : 29,
-        condition : "Sunny",
-        windSpeed : 19 ,
-        humidity : 22,
-        icon : "sunny"
+export const weatherData: WeatherCardProps[] = [
+    {   
+        date:'2024-07-09',
+        city:"Guayaquil",
+        precipitation: 0.03,
+        windSpeed: 3.14,
+        temperature: 25,
+        humidity: 78,
+        cloud: "scattered clouds",
+        value: 298.13
+    },
+    {   
+        date:'2024-07-09',
+        city:"Guayaquil",
+        precipitation: 0.03,
+        windSpeed: 3.14,
+        temperature: 25,
+        humidity: 78,
+        cloud: "scattered clouds",
+        value: 298.13
     },
     {
-        city: "Tokyo",
-        temperature: 26,
-        condition: "Cloudy",
-        windSpeed: 15,
-        humidity: 28,
-        icon: "cloudy"
-      },
+        date:'2024-07-09',
+        city:"Guayaquil",
+        precipitation: 0.03,
+        windSpeed: 3.14,
+        temperature: 25,
+        humidity: 78,
+        cloud: "scattered clouds",
+        value: 298.13
+    },
+    {
+        date:'2024-07-09',
+        city:"Guayaquil",
+        precipitation: 0.03,
+        windSpeed: 3.14,
+        temperature: 25,
+        humidity: 78,
+        cloud: "scattered clouds",
+        value: 298.13
+    },
+    {
+        date:'2024-07-09',
+        city:"Guayaquil",
+        precipitation: 0.03,
+        windSpeed: 3.14,
+        temperature: 25,
+        humidity: 78,
+        cloud: "scattered clouds",
+        value: 298.13
+    },
 ]

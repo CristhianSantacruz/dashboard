@@ -27,5 +27,3 @@ export   const fetchAndParseXML = async () => {
         console.error('Error al consumir la API:', error);
     }
 };
-
-
