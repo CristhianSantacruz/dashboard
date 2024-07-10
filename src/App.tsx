@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import Indicator from './components/Indicator';
 import BasicTable from './components/BasicTable';
 import AverageIndicators from './components/AverageIndicator';
-
+import { WeatherCardProps } from './components/WeatherCardProps';
 interface Row {
   rangeHours: string;
   windDirection: string;
@@ -20,17 +20,14 @@ function App() {
   let [rowsTable, setRowsTable] = useState<Array<Row>>([]);
   let [city,setCity] = useState("Ecuador")
   let [country,setCountry] =  useState("")
+
   let [averageTemperature,setAverageTemperature] = useState(0)
-  
+  let [averageHumidity,setAverageHumidity] = useState(0)
+  let [averagePrecipitation,setAveragePrecipitation] = useState(0)
+  let [averageVisibility,setAverageVisibility] = useState(0)
 
-  const averageData = {
-    precipitation: 0.02,
-    humidity: 61,
-    temperature: 302.67 - 273.15, // Convertir de Kelvin a Celsius
-    visibility: 10000
- } 
-  // Estado para almacenar la URL de la imagen de fondo actual
-
+  let [weatherDataAverageByDay,setWeatherDataAverageByDay] = useState<Array<WeatherCardProps>>([])
+ 
 
   useEffect(() => {
     async function fetchData() {
@@ -85,6 +82,7 @@ function App() {
      
       setIndicators(indicatorsElements); 
       
+      //important data 
       
       let arrayObjects = Array.from(xml.getElementsByTagName("time")).map((timeElement:any) => {
             let rangeHours = timeElement.getAttribute("from").split("T")[1] + " - " + timeElement.getAttribute("to").split("T")[1];
@@ -92,27 +90,108 @@ function App() {
             return { rangeHours, windDirection };
       });
 
-      let arrayTempuratureData = Array.from(xml.getElementsByTagName("time")).map((timeElement:any) => {
-        let temperature = timeElement.getElementsByTagName("temperature")[0].getAttribute("value")
-        return {temperature}
-      })
-      
+      const getDataFromXML = (xml: any, tagName: string, attributeName: string) => {
+        return Array.from(xml.getElementsByTagName("time")).map((timeElement: any) => {
+          const value = timeElement.getElementsByTagName(tagName)[0].getAttribute(attributeName);
+          return { [attributeName]: value };
+        });
+      };
 
-      //saco un promedio de las temperaturas para de todos los dias
-      const temperatures = arrayTempuratureData.map(data => parseFloat(data.temperature));
+      let arrayTemperatureData = getDataFromXML(xml, "temperature", "value");
+      let arrayHumidityData = getDataFromXML(xml, "humidity", "value");
+      let arrayPrecipitationData = getDataFromXML(xml, "precipitation", "probability");
+      let arrayVisibilityData = getDataFromXML(xml,"visibility","value")    
+
+      
+      //saco un promedio de las temperaturas para de todos los dias en todas las horas
+      const temperatures = arrayTemperatureData.map(data => parseFloat(data.value));
       const sumKelvin = temperatures.reduce((total, temperature) => total + temperature, 0);
       const averageTemperatureKelvin = sumKelvin / temperatures.length;
       const averageTemperatureCelsius = Number((averageTemperatureKelvin - 273.15).toFixed(2));
       setAverageTemperature(averageTemperatureCelsius)
-      console.log(`Promedio de temperatura en Celsius: ${averageTemperatureCelsius} °C`);
 
-      
+      //saco un promedio de la humedad de todos los dias en todas las horas
+      const humiditys = arrayHumidityData.map(data=>parseFloat(data.value));
+      const sumHumidity = humiditys.reduce((total,humidity)=>total+humidity,0);
+      const averageHumidity = Number(sumHumidity / humiditys.length)
+      setAverageHumidity(averageHumidity)
 
-      console.log("ARRAY DENTRO DEL OBJECT",arrayObjects)  
-      console.log("TODAS LAS TEMPERATURAS ",arrayTempuratureData)
+      //saco un promedio de la probabilidad de precipcitacion en esos 5 dias
+      const precipitations = arrayPrecipitationData.map(data=>parseFloat(data.probability))
+      const sumPrecipitation = precipitations.reduce((total,precipitation)=>total+precipitation,0);
+      setAveragePrecipitation(Number(sumPrecipitation/precipitations.length))
+
+      //saco un promedio de la visibilidad en esos 5 dias
+      const visibilitys = arrayVisibilityData.map(data=>parseFloat(data.value))
+      const sumVisibility = visibilitys.reduce((total,visibility)=>total+visibility,0)
+      setAverageVisibility(Number(sumVisibility/visibilitys.length))
+    
       arrayObjects = arrayObjects.slice(0, 8);
 
+
+      const temperaturesByDay : any = [];
+      for (let i = 0; i < temperatures.length; i += 8) {
+        const slice = temperatures.slice(i, i + 8);
+        const sumKelvin = slice.reduce((total, temp) => total + temp, 0);
+        const averageKelvin = sumKelvin / slice.length;
+        const averageCelsius = Number((averageKelvin - 273.15).toFixed(2)); // Convertir Kelvin a Celsius y redondear a dos decimales
+        temperaturesByDay.push(averageCelsius);
+      }
+
+      console.log("Promedios de cada grupo de 8 datos en Celsius:", temperaturesByDay);
+
+
+     
+      function calculateAverageByGroups(dataArray:any, groupSize:number) {
+        const averages = [];
+        for (let i = 0; i < dataArray.length; i += groupSize) {
+            const slice = dataArray.slice(i, i + groupSize);
+            const sum = slice.reduce((total:number, value:number) => total + value, 0);
+            const average = sum / slice.length;
+            averages.push(average);
+        }
+        return averages;
+    }
+
+     const humidityByDay = calculateAverageByGroups(humiditys, 8);
+     const visibilityByDay = calculateAverageByGroups(visibilitys, 8);
+     const probabilityRainByDay = calculateAverageByGroups(precipitations,8);
+
+
       setRowsTable(arrayObjects);
+
+      const getUniqueDatesFromXML = (xml: any) => {
+        const uniqueDates = new Set<string>();
+        Array.from(xml.getElementsByTagName("time")).forEach((timeElement: any) => {
+          const date = timeElement.getAttribute("from").split("T")[0];
+          uniqueDates.add(date);
+        });
+        return Array.from(uniqueDates).map((date) => ({ rangeHours: date }));
+      };
+      
+      // Ejemplo de cómo usar la función para obtener fechas únicas
+      let arrayUniqueDates = getUniqueDatesFromXML(xml);
+      arrayUniqueDates.pop();
+      console.log("Fechas únicas:", arrayUniqueDates)
+      
+
+      
+      // arreglo vacío para almacenar los datos de cada día
+      const weatherDataApp: WeatherCardProps[] = [];
+      arrayUniqueDates.forEach((dateObj, index) => {
+            weatherDataApp.push({
+                date: dateObj.rangeHours,
+                city: cityName,
+                precipitation: probabilityRainByDay[index],
+                windSpeed: 3.14, 
+                temperature: temperaturesByDay[index],
+                humidity: humidityByDay[index],
+                cloud: "scattered clouds", 
+                value: visibilityByDay[index]
+            });
+      });
+      setWeatherDataAverageByDay(weatherDataApp)
+
     }}
     
     fetchData();
@@ -126,9 +205,9 @@ function App() {
               Clima en la ciudad de {city}
             </Typography>
           
-            <WeatherApp />
+            <WeatherApp  weatherData={weatherDataAverageByDay} />
 
-            <AverageIndicators humidity={averageData.humidity} precipitation={averageData.precipitation} temperature={averageTemperature} visibility={averageData.visibility} /> 
+            <AverageIndicators humidity={averageHumidity} precipitation={averagePrecipitation} temperature={averageTemperature} visibility={averageVisibility} /> 
        
 
             <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>

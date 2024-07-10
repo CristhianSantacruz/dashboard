@@ -1,9 +1,12 @@
-
-import { weatherData } from '../data/watherData'
 import WeatherCard from './WeatherCardProps'
 import { Grid } from '@mui/material';
+import { WeatherCardProps } from './WeatherCardProps';
 
-const WeatherApp: React.FC = () => {
+interface WeatherAppProps {
+  weatherData?: WeatherCardProps[]; 
+}
+
+const WeatherApp: React.FC<WeatherAppProps> = ({ weatherData = [] }) => {
   return (
     <div style={{ padding: 20 }}>
       <Grid container justifyContent="center" spacing={3}>

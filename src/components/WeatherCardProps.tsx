@@ -2,7 +2,7 @@ import { Card, CardContent, Typography, Grid, IconButton, Box,CardMedia} from '@
 import { LocationOn } from '@mui/icons-material'; // Example icon
 
 
-interface WeatherCardProps {
+export interface WeatherCardProps {
     date : string
     city: string,
     precipitation : number

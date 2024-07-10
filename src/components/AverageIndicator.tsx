@@ -10,10 +10,10 @@ export interface AverageConfig {
     precipitation : number,
     humidity : number,
     temperature : number,
-    visibility : number
+    visibility : number,
 }
 
-const AverageIndicator = ({ icon, title, value }: { icon: React.ReactNode, title: string, value: number }) => {
+const AverageIndicator = ({ icon, title, value,unit }: { icon: React.ReactNode, title: string, value: number ,unit:string}) => {
     return (
         <Paper
             sx={{
@@ -33,7 +33,7 @@ const AverageIndicator = ({ icon, title, value }: { icon: React.ReactNode, title
                 {title}
             </Typography>
             <Typography component="p" variant="h4">
-                {value.toFixed(2)}
+                {value.toFixed(2)} {unit}
             </Typography>
         </Paper>
     );
@@ -43,16 +43,16 @@ const AverageIndicators: React.FC<AverageConfig> = (averageConfig:AverageConfig)
     return (
         <Grid container spacing={2} sx={{marginTop:2}}>
             <Grid item xs={6} lg={6}>
-                <AverageIndicator icon={<WaterDropOutlinedIcon sx={{ fontSize: 40, color: 'blue' }} />} title="Precipitación Promedio" value={averageConfig.precipitation * 100}/>
+                <AverageIndicator unit='% 🌧️' icon={<WaterDropOutlinedIcon sx={{ fontSize: 40, color: 'blue' }} />} title="Precipitación Probabilidad Promedio" value={averageConfig.precipitation * 100}/>
             </Grid>
             <Grid item xs={6} lg={6}>
-                <AverageIndicator icon={<OpacityIcon sx={{fontSize:40,color:'blue'}} />} title="Humedad Promedio" value={averageConfig.humidity} />
+                <AverageIndicator unit='%'  icon={<OpacityIcon sx={{fontSize:40,color:'blue'}} />} title="Humedad Promedio" value={averageConfig.humidity} />
             </Grid>
             <Grid item xs={6} lg={6}>
-                <AverageIndicator icon={<ThermostatIcon sx={{fontSize:40,color:'red'}}/>} title="Temperatura Promedio" value={averageConfig.temperature} />
+                <AverageIndicator unit='°C' icon={<ThermostatIcon sx={{fontSize:40,color:'red'}}/>} title="Temperatura Promedio" value={averageConfig.temperature} />
             </Grid>
             <Grid item xs={6} lg={6}>
-                <AverageIndicator icon={<VisibilityIcon sx={{fontSize:40,color:'aqua'}} />} title="Visibilidad Promedio" value={averageConfig.visibility} />
+                <AverageIndicator unit='☁️' icon={<VisibilityIcon sx={{fontSize:40,color:'aqua'}} />} title="Visibilidad Promedio" value={averageConfig.visibility} />
             </Grid>
         </Grid>
     );
