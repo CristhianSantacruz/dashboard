@@ -24,12 +24,12 @@ const AverageIndicator = ({ icon, title, value,unit }: { icon: React.ReactNode, 
                 alignItems: 'center',
                 border: '20px solid #ccc',
                
-                borderBlockEndColor:'goldenrod',
+                borderBlockEndColor:'#276F55',
                 boxShadow: 3,
             }}
         >
             <Icon sx={{ fontSize: 40, mb: 1 }}>{icon}</Icon>
-            <Typography component="h2" variant="h6" color="primary" gutterBottom>
+            <Typography component="h2" variant="h6" color="#276F55" gutterBottom>
                 {title}
             </Typography>
             <Typography component="p" variant="h4">

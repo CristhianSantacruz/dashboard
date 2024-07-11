@@ -16,7 +16,7 @@ export default function Indicator(config:Config){
               flexDirection: 'column'
             }}
           >
-            <Typography component="h2" variant="h6" color="primary" gutterBottom>
+            <Typography component="h2" variant="h6" color="#276F55" gutterBottom sx={{fontWeight:'bold',fontStyle:"italic"}}>
                 {config.title} 
             </Typography>
             <Typography component="p" variant="h4">

@@ -10,6 +10,7 @@ import Indicator from './components/Indicator';
 import BasicTable from './components/BasicTable';
 import AverageIndicators from './components/AverageIndicator';
 import { WeatherCardProps } from './components/WeatherCardProps';
+
 interface Row {
   rangeHours: string;
   windDirection: string;
@@ -27,6 +28,8 @@ function App() {
   let [averageVisibility,setAverageVisibility] = useState(0)
 
   let [weatherDataAverageByDay,setWeatherDataAverageByDay] = useState<Array<WeatherCardProps>>([])
+  let [averageTemperatureToday,setAverageTemperatureToday] = useState(0)
+  let [averageHumidityToday,setAverageHumidityToday] = useState(0)
  
 
   useEffect(() => {
@@ -70,12 +73,14 @@ function App() {
       let geobaseid = location.getAttribute("geobaseid");
       let latitude = location.getAttribute("latitude");
       let longitude = location.getAttribute("longitude");
+      let timeZone = xml.getElementsByTagName("timezone")[0].innerHTML
       
       
-      dataToIndicators.push(["Location","name",cityName])
-      dataToIndicators.push(["Location", "geobaseid", geobaseid]);
-      dataToIndicators.push(["Location", "Latitude", latitude]);
-      dataToIndicators.push(["Location", "Longitude", longitude]);  
+      dataToIndicators.push(["Ubicación","name",cityName])
+      dataToIndicators.push(["Ubicación", "geobaseid", geobaseid]);
+      dataToIndicators.push(["Ubicación", "Latitud", latitude]);
+      dataToIndicators.push(["Ubicación", "Longitud", longitude]);
+      dataToIndicators.push(["Ubicación","TimeZone",timeZone])  
       let indicatorsElements:any = dataToIndicators.map(
         (element) => <Indicator title={element[0]} subtitle={element[1]} value={element[2]} />
       );
@@ -139,6 +144,7 @@ function App() {
       }
 
       console.log("Promedios de cada grupo de 8 datos en Celsius:", temperaturesByDay);
+      setAverageTemperatureToday(temperaturesByDay[0])
 
 
      
@@ -157,6 +163,8 @@ function App() {
      const visibilityByDay = calculateAverageByGroups(visibilitys, 8);
      const probabilityRainByDay = calculateAverageByGroups(precipitations,8);
 
+     setAverageHumidityToday(humidityByDay[0])
+
 
       setRowsTable(arrayObjects);
 
@@ -171,10 +179,12 @@ function App() {
       
       // Ejemplo de cómo usar la función para obtener fechas únicas
       let arrayUniqueDates = getUniqueDatesFromXML(xml);
-      arrayUniqueDates.pop();
+      if(arrayUniqueDates.length >=6 ) {
+        arrayUniqueDates.pop()
+      }
       console.log("Fechas únicas:", arrayUniqueDates)
       
-
+      console.log("TIEMPO DE ZONA",timeZone)
       
       // arreglo vacío para almacenar los datos de cada día
       const weatherDataApp: WeatherCardProps[] = [];
@@ -197,25 +207,20 @@ function App() {
     fetchData();
   }, []);
 
+
   return (
     <>
       <Grid container spacing={2} columns={16} sx={{gap:'2'} }>
         <Grid item xs={12} lg={12} >
-            <Typography color={"white"} variant="h4" align="center">
-              Clima en la ciudad de {city}
-            </Typography>
-          
+
+            <section className="wrapper">
+              <div className="top">Clima en la ciudad de {city}</div>
+              <div className="bottom" aria-hidden="true">Clima en la ciudad de {city}</div>
+            </section>
+     
             <WeatherApp  weatherData={weatherDataAverageByDay} />
 
             <AverageIndicators humidity={averageHumidity} precipitation={averagePrecipitation} temperature={averageTemperature} visibility={averageVisibility} /> 
-       
-
-            <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
-              <Grid item xs={12} lg={4}>
-                <ControlPanel />
-              </Grid>
-            </Grid>
-
             <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
               <Grid item xs={12}>
                 <TemperatureChart />
@@ -248,20 +253,25 @@ function App() {
           alignItems: 'center',
            
         }} xs={12} lg={4}>
-          <WeatherTodayCard city={city} country={country} /> 
+          <WeatherTodayCard city={city} country={country} averageTemperatureToday={ averageTemperatureToday} averageHumidityToday={averageHumidityToday} /> 
           
           {/* Grid para los indicadores */}
-          <Grid container spacing={2} sx={{ marginTop: 2 }}>
-            <Grid item xs={6} lg={16}>
-              {indicators[0]}
+          <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
+              <Grid item xs={12} lg={16}>
+                <ControlPanel />
+              </Grid>
             </Grid>
+          <Grid container spacing={1} sx={{ marginTop: 1 }}>
             <Grid item xs={6} lg={16}>
+              {indicators[4]}
+            </Grid>
+            <Grid item xs={6}  lg={16}>
               {indicators[1]}
             </Grid>
             <Grid item xs={6}  lg={16}>
               {indicators[2]}
             </Grid>
-            <Grid item xs={6}  lg={16}>
+            <Grid item xs={6} lg={16}>
               {indicators[3]}
             </Grid>
           </Grid>  
