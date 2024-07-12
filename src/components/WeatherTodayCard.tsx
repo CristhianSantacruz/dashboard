@@ -45,10 +45,11 @@ interface WatherTodayCardProps {
   country : string 
   averageTemperatureToday:number
   averageHumidityToday:number
+  day : string,
 
 }
 
-const WeatherTodayCard  : React.FC<WatherTodayCardProps>= ({city,country,averageTemperatureToday,averageHumidityToday}) => {
+const WeatherTodayCard  : React.FC<WatherTodayCardProps>= ({day,city,country,averageTemperatureToday,averageHumidityToday}) => {
 
 
   return (
@@ -66,7 +67,8 @@ const WeatherTodayCard  : React.FC<WatherTodayCardProps>= ({city,country,average
             <Typography gutterBottom variant="h5" component="div" align="center">
               {country}
             </Typography>
-          </Box>
+        </Box>
+        <Typography sx={{fontSize:'16px'}}>{day}</Typography>
         <Box sx={{display:'flex',justifyContent : 'center',gap:2,marginTop:'5px'}}>
           <DeviceThermostatOutlinedIcon sx={{color:'#276F55'}}/>
           <Typography sx={{marginLeft:'-20px'}}>{averageTemperatureToday} C</Typography>

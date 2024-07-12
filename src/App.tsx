@@ -10,11 +10,8 @@ import Indicator from './components/Indicator';
 import BasicTable from './components/BasicTable';
 import AverageIndicators from './components/AverageIndicator';
 import { WeatherCardProps } from './components/WeatherCardProps';
+import { Row } from './components/BasicTable';
 
-interface Row {
-  rangeHours: string;
-  windDirection: string;
-}
 
 function App() {
   let [indicators, setIndicators] = useState([]);
@@ -30,7 +27,66 @@ function App() {
   let [weatherDataAverageByDay,setWeatherDataAverageByDay] = useState<Array<WeatherCardProps>>([])
   let [averageTemperatureToday,setAverageTemperatureToday] = useState(0)
   let [averageHumidityToday,setAverageHumidityToday] = useState(0)
- 
+
+  let [todayDate,setTodayDate] = useState("")
+  
+  const daysOfWeek = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+
+  const formatDate = (dateString:string) => {
+    const date = new Date(dateString);
+    const dayName = daysOfWeek[date.getUTCDay()];
+    return `${dayName} ${dateString}`;
+  };
+  
+
+const getUniqueDatesandCountTimesFromXML = (xml: any) => {
+  const dateCountMap: { [date: string]: number } = {};
+
+  Array.from(xml.getElementsByTagName("time")).forEach((timeElement: any) => {
+    const date = timeElement.getAttribute("from").split("T")[0];
+    if (date in dateCountMap) {
+      dateCountMap[date]++;
+    } else {
+      dateCountMap[date] = 1;
+    }
+  });
+
+  return Object.keys(dateCountMap).map((date) => ({
+    date: date,
+    count: dateCountMap[date],
+  }));
+};
+
+function calculateAverageTemperatureByGroups(dataArray:any, counts:number[]) {
+  const averages:number[] = [];
+  let currentIndex = 0;
+
+  counts.forEach(count => {
+    const slice = dataArray.slice(currentIndex, currentIndex + count);
+    const sumKelvin = slice.reduce((total:number, temp:number) => total + temp, 0);
+    const averageKelvin = sumKelvin / slice.length;
+    const averageCelsius = Number((averageKelvin - 273.15).toFixed(2)); // Convertir Kelvin a Celsius y redondear a dos decimales
+    averages.push(averageCelsius);
+    currentIndex += count;
+  });
+
+  return averages;
+}
+
+function calculateAverageByGroups(dataArray:any, counts:number[]) {
+  const averages : number[] = [];
+  let currentIndex = 0;
+
+  counts.forEach(count  => {
+    const slice = dataArray.slice(currentIndex, currentIndex + count);
+    const sum = slice.reduce((total:number, value:number) => total + value, 0);
+    const average = (sum / slice.length).toFixed(2);
+    averages.push(Number(average));
+    currentIndex += count;
+  });
+
+  return averages;
+}
 
   useEffect(() => {
     async function fetchData() {
@@ -87,12 +143,19 @@ function App() {
      
       setIndicators(indicatorsElements); 
       
+      //contar cuantos datos hay para el dia de hoy por ejemplo si es 12 y hay solo datos para 3 diferentes horas seria 3 datos para 12
+
+
       //important data 
       
       let arrayObjects = Array.from(xml.getElementsByTagName("time")).map((timeElement:any) => {
             let rangeHours = timeElement.getAttribute("from").split("T")[1] + " - " + timeElement.getAttribute("to").split("T")[1];
             let windDirection = timeElement.getElementsByTagName("windDirection")[0].getAttribute("deg") + " " + timeElement.getElementsByTagName("windDirection")[0].getAttribute("code");
-            return { rangeHours, windDirection };
+            let windSpeed = timeElement.getElementsByTagName("windSpeed")[0].getAttribute("mps") + " " + timeElement.getElementsByTagName("windSpeed")[0].getAttribute("unit")
+            let windGust = timeElement.getElementsByTagName("windGust")[0].getAttribute("gust") + " " +  timeElement.getElementsByTagName("windGust")[0].getAttribute("unit")
+            let clouds = timeElement.getElementsByTagName("clouds")[0].getAttribute("value") + " " + timeElement.getElementsByTagName("clouds")[0].getAttribute("all") + "" +   timeElement.getElementsByTagName("clouds")[0].getAttribute("unit")
+            let visibility = timeElement.getElementsByTagName("visibility")[0].getAttribute("value")
+            return { rangeHours, windDirection,windSpeed,windGust,clouds,visibility };
       });
 
       const getDataFromXML = (xml: any, tagName: string, attributeName: string) => {
@@ -114,83 +177,45 @@ function App() {
       const averageTemperatureKelvin = sumKelvin / temperatures.length;
       const averageTemperatureCelsius = Number((averageTemperatureKelvin - 273.15).toFixed(2));
       setAverageTemperature(averageTemperatureCelsius)
-
       //saco un promedio de la humedad de todos los dias en todas las horas
       const humiditys = arrayHumidityData.map(data=>parseFloat(data.value));
       const sumHumidity = humiditys.reduce((total,humidity)=>total+humidity,0);
       const averageHumidity = Number(sumHumidity / humiditys.length)
       setAverageHumidity(averageHumidity)
-
       //saco un promedio de la probabilidad de precipcitacion en esos 5 dias
       const precipitations = arrayPrecipitationData.map(data=>parseFloat(data.probability))
       const sumPrecipitation = precipitations.reduce((total,precipitation)=>total+precipitation,0);
       setAveragePrecipitation(Number(sumPrecipitation/precipitations.length))
-
       //saco un promedio de la visibilidad en esos 5 dias
       const visibilitys = arrayVisibilityData.map(data=>parseFloat(data.value))
       const sumVisibility = visibilitys.reduce((total,visibility)=>total+visibility,0)
       setAverageVisibility(Number(sumVisibility/visibilitys.length))
     
-      arrayObjects = arrayObjects.slice(0, 8);
 
+      // Supongamos que ya tienes el XML y has obtenido los conteos por día
+      const uniqueDatesAndCounts = getUniqueDatesandCountTimesFromXML(xml);
+      const counts = uniqueDatesAndCounts.map(entry => entry.count)
+      const dates  = uniqueDatesAndCounts.map(entry =>entry.date)
 
-      const temperaturesByDay : any = [];
-      for (let i = 0; i < temperatures.length; i += 8) {
-        const slice = temperatures.slice(i, i + 8);
-        const sumKelvin = slice.reduce((total, temp) => total + temp, 0);
-        const averageKelvin = sumKelvin / slice.length;
-        const averageCelsius = Number((averageKelvin - 273.15).toFixed(2)); // Convertir Kelvin a Celsius y redondear a dos decimales
-        temperaturesByDay.push(averageCelsius);
-      }
+      // Luego puedes calcular los promedios por día
+      const humidityByDay = calculateAverageByGroups(humiditys, counts);
+      const visibilityByDay = calculateAverageByGroups(visibilitys, counts);
+      const probabilityRainByDay = calculateAverageByGroups(precipitations, counts);
+      const temperaturesByDay = calculateAverageTemperatureByGroups(temperatures, counts);
+      
+      arrayObjects = arrayObjects.slice(0, getUniqueDatesandCountTimesFromXML(xml)[0].count);
 
-      console.log("Promedios de cada grupo de 8 datos en Celsius:", temperaturesByDay);
+      setAverageHumidityToday(humidityByDay[0])
       setAverageTemperatureToday(temperaturesByDay[0])
-
-
-     
-      function calculateAverageByGroups(dataArray:any, groupSize:number) {
-        const averages = [];
-        for (let i = 0; i < dataArray.length; i += groupSize) {
-            const slice = dataArray.slice(i, i + groupSize);
-            const sum = slice.reduce((total:number, value:number) => total + value, 0);
-            const average = sum / slice.length;
-            averages.push(average);
-        }
-        return averages;
-    }
-
-     const humidityByDay = calculateAverageByGroups(humiditys, 8);
-     const visibilityByDay = calculateAverageByGroups(visibilitys, 8);
-     const probabilityRainByDay = calculateAverageByGroups(precipitations,8);
-
-     setAverageHumidityToday(humidityByDay[0])
-
-
       setRowsTable(arrayObjects);
-
-      const getUniqueDatesFromXML = (xml: any) => {
-        const uniqueDates = new Set<string>();
-        Array.from(xml.getElementsByTagName("time")).forEach((timeElement: any) => {
-          const date = timeElement.getAttribute("from").split("T")[0];
-          uniqueDates.add(date);
-        });
-        return Array.from(uniqueDates).map((date) => ({ rangeHours: date }));
-      };
-      
-      // Ejemplo de cómo usar la función para obtener fechas únicas
-      let arrayUniqueDates = getUniqueDatesFromXML(xml);
-      if(arrayUniqueDates.length >=6 ) {
-        arrayUniqueDates.pop()
-      }
-      console.log("Fechas únicas:", arrayUniqueDates)
-      
-      console.log("TIEMPO DE ZONA",timeZone)
-      
+      setRowsTable(arrayObjects)
+      setTodayDate(formatDate(getUniqueDatesandCountTimesFromXML(xml)[0].date))
+    
       // arreglo vacío para almacenar los datos de cada día
       const weatherDataApp: WeatherCardProps[] = [];
-      arrayUniqueDates.forEach((dateObj, index) => {
+       dates.forEach((dateObj, index) => {
             weatherDataApp.push({
-                date: dateObj.rangeHours,
+                date: formatDate(dateObj),
                 city: cityName,
                 precipitation: probabilityRainByDay[index],
                 windSpeed: 3.14, 
@@ -227,14 +252,19 @@ function App() {
               </Grid>
             </Grid>
 
-            <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
+           {/*<Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
               <Grid item xs={12}>
                 <HumidityChart />
               </Grid>
-            </Grid>
+            </Grid> */}
 
             <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
               <Grid item xs={12}>
+                <Typography sx={{marginTop:'5px', color:'white',fontSize:'40px',textAlign:'center',fontWeight:'bold', textShadow: '2px 2px 4px #276F55' }}>☁️ Como estara el cielo el dia de hoy ⛅</Typography>
+
+                <Typography sx={{marginTop:'5px', color:'white',fontSize:'40px',textAlign:'center',fontWeight:'bold', textShadow: '2px 2px 4px #276F55' }}>
+                  {todayDate}
+                </Typography>
                 <BasicTable rows={rowsTable} />
               </Grid>
             </Grid>
@@ -253,14 +283,9 @@ function App() {
           alignItems: 'center',
            
         }} xs={12} lg={4}>
-          <WeatherTodayCard city={city} country={country} averageTemperatureToday={ averageTemperatureToday} averageHumidityToday={averageHumidityToday} /> 
+          <WeatherTodayCard city={city} country={country} averageTemperatureToday={ averageTemperatureToday} averageHumidityToday={averageHumidityToday} day={todayDate}/> 
           
           {/* Grid para los indicadores */}
-          <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
-              <Grid item xs={12} lg={16}>
-                <ControlPanel />
-              </Grid>
-            </Grid>
           <Grid container spacing={1} sx={{ marginTop: 1 }}>
             <Grid item xs={6} lg={16}>
               {indicators[4]}
@@ -274,6 +299,11 @@ function App() {
             <Grid item xs={6} lg={16}>
               {indicators[3]}
             </Grid>
+          </Grid>
+          <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
+              <Grid item xs={12} lg={16}>
+                <ControlPanel />
+              </Grid>
           </Grid>  
         </Grid>  
       </Grid>
