@@ -3,7 +3,6 @@ import { Grid, Typography } from '@mui/material';
 import WeatherApp from './components/WeatherApp';
 import WeatherTodayCard from './components/WeatherTodayCard';
 import ControlPanel from './components/ControlPanel';
-import HumidityChart from './components/charts/HumidityChart';
 import TemperatureChart from './components/charts/TemperatureChart';
 import { useEffect, useState } from 'react';
 import Indicator from './components/Indicator';
