@@ -3,7 +3,7 @@ import { Grid, Typography } from '@mui/material';
 import WeatherApp from './components/WeatherApp';
 import WeatherTodayCard from './components/WeatherTodayCard';
 import ControlPanel from './components/ControlPanel';
-import TemperatureChart from './components/charts/TemperatureChart';
+import WeatherChart from './components/charts/WeatherChart';
 import { useEffect, useState } from 'react';
 import Indicator from './components/Indicator';
 import BasicTable from './components/BasicTable';
@@ -12,33 +12,7 @@ import { WeatherCardProps } from './components/WeatherCardProps';
 import { Row } from './components/BasicTable';
 
 
-function App() {
-  let [indicators, setIndicators] = useState([]);
-  let [rowsTable, setRowsTable] = useState<Array<Row>>([]);
-  let [city,setCity] = useState("Ecuador")
-  let [country,setCountry] =  useState("")
-
-  let [averageTemperature,setAverageTemperature] = useState(0)
-  let [averageHumidity,setAverageHumidity] = useState(0)
-  let [averagePrecipitation,setAveragePrecipitation] = useState(0)
-  let [averageVisibility,setAverageVisibility] = useState(0)
-
-  let [weatherDataAverageByDay,setWeatherDataAverageByDay] = useState<Array<WeatherCardProps>>([])
-  let [averageTemperatureToday,setAverageTemperatureToday] = useState(0)
-  let [averageHumidityToday,setAverageHumidityToday] = useState(0)
-
-  let [todayDate,setTodayDate] = useState("")
-  
-  const daysOfWeek = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
-
-  const formatDate = (dateString:string) => {
-    const date = new Date(dateString);
-    const dayName = daysOfWeek[date.getUTCDay()];
-    return `${dayName} ${dateString}`;
-  };
-  
-
-const getUniqueDatesandCountTimesFromXML = (xml: any) => {
+export const getUniqueDatesandCountTimesFromXML = (xml: any) => {
   const dateCountMap: { [date: string]: number } = {};
 
   Array.from(xml.getElementsByTagName("time")).forEach((timeElement: any) => {
@@ -56,7 +30,9 @@ const getUniqueDatesandCountTimesFromXML = (xml: any) => {
   }));
 };
 
-function calculateAverageTemperatureByGroups(dataArray:any, counts:number[]) {
+
+
+export function calculateAverageTemperatureByGroups(dataArray:any, counts:number[]) {
   const averages:number[] = [];
   let currentIndex = 0;
 
@@ -72,7 +48,7 @@ function calculateAverageTemperatureByGroups(dataArray:any, counts:number[]) {
   return averages;
 }
 
-function calculateAverageByGroups(dataArray:any, counts:number[]) {
+export function calculateAverageByGroups(dataArray:any, counts:number[]) {
   const averages : number[] = [];
   let currentIndex = 0;
 
@@ -86,6 +62,41 @@ function calculateAverageByGroups(dataArray:any, counts:number[]) {
 
   return averages;
 }
+
+export const getDataFromXML = (xml: any, tagName: string, attributeName: string) => {
+  return Array.from(xml.getElementsByTagName("time")).map((timeElement: any) => {
+    const value = timeElement.getElementsByTagName(tagName)[0].getAttribute(attributeName);
+    return { [attributeName]: value };
+  });
+};
+
+function App() {
+  let [indicators, setIndicators] = useState([]);
+  let [rowsTable, setRowsTable] = useState<Array<Row>>([]);
+  let [city,setCity] = useState("Ecuador")
+  let [country,setCountry] =  useState("")
+
+  let [averageTemperature,setAverageTemperature] = useState(0)
+  let [averageHumidity,setAverageHumidity] = useState(0)
+  let [averagePrecipitation,setAveragePrecipitation] = useState(0)
+  let [averageVisibility,setAverageVisibility] = useState(0)
+
+  let [weatherDataAverageByDay,setWeatherDataAverageByDay] = useState<Array<WeatherCardProps>>([])
+  let [averageTemperatureToday,setAverageTemperatureToday] = useState(0)
+  let [averageHumidityToday,setAverageHumidityToday] = useState(0)
+
+  let [todayDate,setTodayDate] = useState("")
+  let [selectVariable,setSelectedVariable] = useState(-1)
+  
+  const daysOfWeek = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+
+  const formatDate = (dateString:string) => {
+    const date = new Date(dateString);
+    const dayName = daysOfWeek[date.getUTCDay()];
+    return `${dayName} ${dateString}`;
+  };
+  
+
 
   useEffect(() => {
     async function fetchData() {
@@ -157,12 +168,7 @@ function calculateAverageByGroups(dataArray:any, counts:number[]) {
             return { rangeHours, windDirection,windSpeed,windGust,clouds,visibility };
       });
 
-      const getDataFromXML = (xml: any, tagName: string, attributeName: string) => {
-        return Array.from(xml.getElementsByTagName("time")).map((timeElement: any) => {
-          const value = timeElement.getElementsByTagName(tagName)[0].getAttribute(attributeName);
-          return { [attributeName]: value };
-        });
-      };
+      
 
       let arrayTemperatureData = getDataFromXML(xml, "temperature", "value");
       let arrayHumidityData = getDataFromXML(xml, "humidity", "value");
@@ -197,7 +203,7 @@ function calculateAverageByGroups(dataArray:any, counts:number[]) {
       const dates  = uniqueDatesAndCounts.map(entry =>entry.date)
 
       // Luego puedes calcular los promedios por día
-      const humidityByDay = calculateAverageByGroups(humiditys, counts);
+     const humidityByDay = calculateAverageByGroups(humiditys, counts);
       const visibilityByDay = calculateAverageByGroups(visibilitys, counts);
       const probabilityRainByDay = calculateAverageByGroups(precipitations, counts);
       const temperaturesByDay = calculateAverageTemperatureByGroups(temperatures, counts);
@@ -247,7 +253,7 @@ function calculateAverageByGroups(dataArray:any, counts:number[]) {
             <AverageIndicators humidity={averageHumidity} precipitation={averagePrecipitation} temperature={averageTemperature} visibility={averageVisibility} /> 
             <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
               <Grid item xs={12}>
-                <TemperatureChart />
+              <WeatherChart selectedVariable={selectVariable} />
               </Grid>
             </Grid>
 
@@ -301,7 +307,7 @@ function calculateAverageByGroups(dataArray:any, counts:number[]) {
           </Grid>
           <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
               <Grid item xs={12} lg={16}>
-                <ControlPanel />
+                <ControlPanel setSelectedVariable={setSelectedVariable}/>
               </Grid>
           </Grid>  
         </Grid>  

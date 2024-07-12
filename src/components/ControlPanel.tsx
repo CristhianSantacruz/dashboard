@@ -1,26 +1,34 @@
 import { Paper , Typography,Box,InputLabel,MenuItem,FormControl,Select,SelectChangeEvent } from "@mui/material";
-import {useRef} from 'react';
-import { fetchAndParseXML } from "../data/openwatherdata";
-export default function ControlPanel(){
+import {useRef,useState} from 'react';
+
+
+export default function ControlPanel({ setSelectedVariable  } : any){
+
+    const descriptionRef = useRef<HTMLDivElement>(null);
+    let[,setSelected] = useState(-1)
+    
+    const handleChange = (event:SelectChangeEvent) => {
+        console.log(parseInt(event.target.value))
+        let value = parseInt(event.target.value)
+        setSelectedVariable(value)
+        let idx = value
+        setSelected(idx);
+        if (descriptionRef.current !== null) {
+			descriptionRef.current.innerHTML = (idx >= 0) ? items[idx]["description"] : ""
+		}
+    }
 
 
     let items = [
+        {"name":"Temperatura","description":"Es una magnitud referida a la noción de calor medible mediante un termómetro"},
 		{"name":"Precipitación", "description":"Cantidad de agua, en forma de lluvia, nieve o granizo, que cae sobre una superficie en un período específico."}, 
 		{"name": "Humedad", "description":"Cantidad de vapor de agua presente en el aire, generalmente expresada como un porcentaje."}, 
-		{"name":"Nubosidad", "description":"Grado de cobertura del cielo por nubes, afectando la visibilidad y la cantidad de luz solar recibida."},
         {"name":"Visibilidad","description":"Es la distancia máxima a la que se pueden ver y reconocer claramente los objetos bajo condiciones atmosféricas actuales"}
 	]
 
     let options = items.map( (item, key) => <MenuItem key={key} value={key}>{item["name"]}</MenuItem> )
     
-    const handleChange = (event: SelectChangeEvent) => {
-        let idx = parseInt(event.target.value)
-        if (descriptionRef.current !== null) {
-			descriptionRef.current.innerHTML = (idx >= 0) ? items[idx]["description"] : ""
-		}
-        console.log(fetchAndParseXML())
-    }
-    const descriptionRef = useRef<HTMLDivElement>(null);
+
     return (
         
 		<Paper
