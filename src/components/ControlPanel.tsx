@@ -23,7 +23,7 @@ export default function ControlPanel({ setSelectedVariable  } : any){
         {"name":"Temperatura","description":"Es una magnitud referida a la noción de calor medible mediante un termómetro"},
 		{"name":"Precipitación", "description":"Cantidad de agua, en forma de lluvia, nieve o granizo, que cae sobre una superficie en un período específico."}, 
 		{"name": "Humedad", "description":"Cantidad de vapor de agua presente en el aire, generalmente expresada como un porcentaje."}, 
-        {"name":"Visibilidad","description":"Es la distancia máxima a la que se pueden ver y reconocer claramente los objetos bajo condiciones atmosféricas actuales"}
+        {"name":"Presion","description":"Magnitud que se define como la derivada de la fuerza con respecto al área."}
 	]
 
     let options = items.map( (item, key) => <MenuItem key={key} value={key}>{item["name"]}</MenuItem> )
