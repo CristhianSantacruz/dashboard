@@ -53,7 +53,7 @@ const WeatherTodayCard  : React.FC<WatherTodayCardProps>= ({day,city,country,ave
 
 
   return (
-    <Card sx={{ maxWidth: 200 , px:3 , py:2,borderRadius:'16px'}}>
+    <Card sx={{ maxWidth: 200 , px:3 , py:2,borderRadius:'16px',boxShadow:'20px 2px 20px #276F55'}}>
       <CardMedia
         sx={{ height: 140, display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: 'white', px:'1px',py:'10px' ,borderRadius:'16px' }}
       >
