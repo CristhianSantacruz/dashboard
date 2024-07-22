@@ -265,7 +265,7 @@ function App() {
 
             <Grid container justifyContent="center" sx={{ marginTop: '20px' }}>
               <Grid item xs={12}>
-                <Typography sx={{marginTop:'5px', color:'white',fontSize:'40px',textAlign:'center',fontWeight:'bold', textShadow: '2px 2px 4px #276F55' }}>☁️ Como estara el cielo el dia de hoy ⛅</Typography>
+                <Typography sx={{marginTop:'5px', color:'white',fontSize:'40px',textAlign:'center',fontWeight:'bold', textShadow: '2px 2px 4px #276F55' }}>☁️ Como estará el cielo el día de hoy ⛅</Typography>
 
                 <Typography sx={{marginTop:'5px', color:'white',fontSize:'40px',textAlign:'center',fontWeight:'bold', textShadow: '2px 2px 4px #276F55' }}>
                   {todayDate}

@@ -19,11 +19,11 @@ const AverageIndicator = ({ icon, title, value,unit }: { icon: React.ReactNode, 
             sx={{
                 m: 1,
                 p: 1,
+                marginRight:2,    
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                border: '20px solid #ccc',
-               
+                border: '5px solid #ccc',           
                 borderBlockEndColor:'#276F55',
                 boxShadow: 3,
             }}
@@ -41,7 +41,7 @@ const AverageIndicator = ({ icon, title, value,unit }: { icon: React.ReactNode, 
 
 const AverageIndicators: React.FC<AverageConfig> = (averageConfig:AverageConfig) => {
     return (
-        <Grid container spacing={2} sx={{marginTop:2}}>
+        <Grid container spacing={2} sx={{marginTop:2,marginLeft:0}}>
             <Grid item xs={6} lg={6}>
                 <AverageIndicator unit='% 🌧️' icon={<WaterDropOutlinedIcon sx={{ fontSize: 40, color: 'blue' }} />} title="Precipitación Probabilidad Promedio" value={averageConfig.precipitation * 100}/>
             </Grid>
